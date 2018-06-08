@@ -1,0 +1,30 @@
+language: c
+compiler:
+- gcc
+env:
+- DEVKITPRO=/opt/devkitpro DEVKITARM=/opt/devkitpro/devkitARM
+cache:
+  directories:
+  - "/opt/devkitpro"
+before_install:
+- wget https://github.com/devkitPro/pacman/releases/download/devkitpro-pacman-1.0.1/devkitpro-pacman.deb
+- sudo dpkg -i devkitpro-pacman.deb
+- sudo dkp-pacman-key --recv F7FD5492264BB9D0
+- sudo dkp-pacman-key --lsign F7FD5492264BB9D0
+- echo -e "[sudo dkp-linux]\nServer = http://downloads.devkitpro.org/packages/linux" | sudo tee /etc/pacman.conf
+- sudo dkp-pacman -U --noconfirm https://downloads.devkitpro.org/devkitpro-keyring-r1.787e015-2-any.pkg.tar.xz
+- sudo dkp-pacman -Syu --noconfirm 3ds-dev
+- sudo dkp-pacman -Syu --noconfirm switch-dev
+
+install: "./prepare.sh"
+script: "./build.sh"
+deploy:
+  provider: releases
+  api_key:
+    secure: $GITHUB_TOKEN
+  file: "ipl.bin"
+  skip_cleanup: true
+
+branches:
+  only:
+    branch: master
